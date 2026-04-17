@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Student Login & Registration</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: 'Poppins', Arial, sans-serif;
+    background: linear-gradient(135deg, #2196F3, #4CAF50);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.page-header {
+    font-size: 28px;
+    padding: 20px;
+    font-weight: 600;
+    margin: 5px 0;
+    color: #fff;
+    text-align: center;
+}
+
+.card {
+    background: #fff;
+    width: 500px;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 65px 60px rgba(0,0,0,0.25);
+}
+
+h2 { text-align: center; }
+
+label {
+    font-size: 16px;
+    margin-top: 10px;
+    display: block;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 100px;
+    background: #5679da;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.msg { text-align:center; margin-top:10px; }
+.error { color:red; }
+.success { color:green; }
+
+.link {
+    text-align:center;
+    margin-top:10px;
+}
+.link span {
+    color:#5679da;
+    cursor:pointer;
+    text-decoration: underline;
+}
+</style>
+</head>
+
+<body>
+
+<div class="page-header">Students Only</div>
+
+<div class="card">
+
+<!-- LOGIN -->
+<div id="loginBox">
+<h2>Student Login</h2>
+
+<label>USN</label>
+<input id="loginUSN">
+
+<label>Password</label>
+<input type="password" id="loginPassword">
+
+<button onclick="login()">Login</button>
+<div class="msg" id="loginMsg"></div>
+
+<div class="link">New student? <span onclick="showRegister()">Register</span></div>
+<div class="link">Forgot Password? <span onclick="showForgot()">Click Here</span></div>
+</div>
+
+<!-- REGISTER -->
+<div id="registerBox">
+<h2>Student Registration</h2>
+
+<label>Name</label>
+<input id="regName">
+
+<label>USN</label>
+<input id="regUSN">
+
+<label>Course</label>
+<select id="regCourse">
+<option value="">Select</option>
+<option>B.E</option>
+<option>B.Tech</option>
+<option>B.Sc</option>
+<option>BCA</option>
+<option>B.Com</option>
+<option>BBA</option>
+<option>B.A</option>
+<option>MBBS</option>
+<option>MCA</option>
+<option>MBA</option>
+<option>M.Tech</option>
+<option>PhD</option>
+</select>
+
+<label>Year</label>
+<select id="regYear">
+<option value="">Select</option>
+<option>1st Year</option>
+<option>2nd Year</option>
+<option>3rd Year</option>
+<option>4th Year</option>
+</select>
+
+<label>Phone</label>
+<input id="regPhone">
+
+<label>Create Password</label>
+<input type="password" id="regPassword">
+
+<label>Confirm Password</label>
+<input type="password" id="regConfirmPassword">
+
+<button onclick="register()">Register</button>
+<div class="msg" id="regMsg"></div>
+
+<div class="link">Already registered? <span onclick="showLogin()">Login</span></div>
+</div>
+
+<!-- FORGOT PASSWORD -->
+<div id="forgotBox" style="display:none">
+<h2>Forgot Password</h2>
+
+<label>USN</label>
+<input id="forgotUSN">
+
+<label>Phone Number</label>
+<input id="forgotPhone">
+
+<button onclick="sendResetOTP()">Verify</button>
+
+<div id="resetPasswordSection" style="display:none">
+<label>New Password</label>
+<input type="password" id="newPassword">
+
+<label>Confirm Password</label>
+<input type="password" id="confirmNewPassword">
+
+<button onclick="resetPassword()">Reset Password</button>
+</div>
+
+<div class="msg" id="forgotMsg"></div>
+<div class="link">Back to Login? <span onclick="showLogin()">Login</span></div>
+</div>
+
+</div>
+
+<script>
+let resetUser = null;
+
+/* PASSWORD VALIDATION */
+function isValidPassword(password){
+  return password.length > 0 && password.length <= 16;
+}
+
+/* PAGE TOGGLE */
+function showRegister(){
+  loginBox.style.display='none';
+  registerBox.style.display='block';
+  forgotBox.style.display='none';
+}
+
+function showLogin(){
+  loginBox.style.display='block';
+  registerBox.style.display='none';
+  forgotBox.style.display='none';
+}
+
+function showForgot(){
+  loginBox.style.display='none';
+  registerBox.style.display='none';
+  forgotBox.style.display='block';
+}
+
+/* FIRST TIME LOGIC */
+(function(){
+  const students = JSON.parse(localStorage.getItem('students')) || [];
+  students.length === 0 ? showRegister() : showLogin();
+})();
+
+/* REGISTER */
+function register(){
+  if(regPassword.value !== regConfirmPassword.value){
+    regMsg.textContent="Passwords do not match";
+    regMsg.className="msg error";
+    return;
+  }
+
+  if(!isValidPassword(regPassword.value)){
+    regMsg.textContent="Password must not exceed 16 characters";
+    regMsg.className="msg error";
+    return;
+  }
+
+  const student = {
+    name: regName.value.trim(),
+    usn: regUSN.value.trim(),
+    course: regCourse.value,
+    year: regYear.value,
+    phone: regPhone.value.trim(),
+    password: regPassword.value
+  };
+
+  if(Object.values(student).some(v => !v)){
+    regMsg.textContent="All fields required";
+    regMsg.className="msg error";
+    return;
+  }
+
+  const students = JSON.parse(localStorage.getItem('students')) || [];
+  students.push(student);
+  localStorage.setItem('students', JSON.stringify(students));
+
+  regMsg.textContent="Registration Successful";
+  regMsg.className="msg success";
+  setTimeout(showLogin,1000);
+}
+
+/* LOGIN */
+function login(){
+  const students = JSON.parse(localStorage.getItem('students')) || [];
+  const user = students.find(s =>
+    s.usn === loginUSN.value.trim() &&
+    s.password === loginPassword.value.trim()
+  );
+
+  if(!user){
+    loginMsg.textContent="Invalid USN or Password";
+    loginMsg.className="msg error";
+    return;
+  }
+
+  /* ONLY CHANGE IS HERE */
+  window.location.href = "http://127.0.0.1:5501/index1.html";
+}
+
+/* FORGOT PASSWORD */
+function sendResetOTP(){
+  const usn = forgotUSN.value.trim();
+  const phone = forgotPhone.value.trim();
+
+  const students = JSON.parse(localStorage.getItem('students')) || [];
+  const user = students.find(s => s.usn === usn && s.phone === phone);
+
+  if(!user){
+    forgotMsg.textContent="USN and Phone Number do not match";
+    forgotMsg.className="msg error";
+    return;
+  }
+
+  resetUser = user;
+  resetPasswordSection.style.display='block';
+  forgotMsg.textContent="Verification successful. Set new password.";
+  forgotMsg.className="msg success";
+}
+
+/* RESET PASSWORD */
+function resetPassword(){
+  if(newPassword.value !== confirmNewPassword.value){
+    forgotMsg.textContent="Passwords do not match";
+    forgotMsg.className="msg error";
+    return;
+  }
+
+  if(!isValidPassword(newPassword.value)){
+    forgotMsg.textContent="Password must not exceed 16 characters";
+    forgotMsg.className="msg error";
+    return;
+  }
+
+  const students = JSON.parse(localStorage.getItem('students'));
+  students.find(s => s.usn === resetUser.usn).password = newPassword.value;
+  localStorage.setItem('students', JSON.stringify(students));
+
+  forgotMsg.textContent="Password reset successful";
+  forgotMsg.className="msg success";
+  setTimeout(showLogin,1000);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E-Attendance Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --primary: #4f46e5;
+      --danger: #ef4444;
+      --success: #16a34a;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #2196F3, #4CAF50);
+      color: var(--text);
+    }
+
+    header {
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: #fff;
+      padding: 30px 20px;
+      max-width: 1100px;
+      text-align: center;
+      margin: auto;
+    }
+
+    .user-bar {
+      max-width: 1100px;
+      margin: 15px auto 0;
+      padding: 12px 20px;
+      background: #ffffff;
+      border-radius: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .user-info {
+      font-weight: 500;
+      color: #1f2937;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .logout-btn {
+      background: #ef4444;
+      border: none;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+
+    .login-btn {
+      background: #4f46e5;
+      border: none;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+
+    .logout-btn:hover,
+    .login-btn:hover {
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: -20px auto 40px;
+      padding: 60px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 12px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      margin-top: 6px;
+      font-family: inherit;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      margin-top: 15px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn.primary { background: var(--primary); color: #fff; }
+    .btn.danger { background: var(--danger); color: #fff; }
+    .btn.success { background: var(--success); color: #fff; }
+    .btn.small { padding: 6px 10px; font-size: 12px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: center;
+    }
+
+    .warning { color: var(--danger); font-weight: 500; }
+    .safe { color: var(--success); font-weight: 500; }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      .user-bar { flex-direction: column; gap: 10px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>E-Attendance Tracker</h1>
+  <p>Smart way to track classes & attendance percentage</p>
+</header>
+
+<div class="user-bar">
+  <div class="user-info">
+    👤 Welcome, <strong id="username">Student Name</strong>
+  </div>
+
+  <div class="action-buttons">
+    <button class="login-btn" onclick="goToLogin()">🔐 Login</button>
+    <button class="logout-btn" onclick="logout()">🔓 Logout</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="grid">
+
+    <div class="card">
+      <h2>Manage Subjects</h2>
+
+      <label>Add New Subject</label>
+      <input id="newSubject" />
+      <button class="btn primary" onclick="addSubject()">Add Subject</button>
+
+      <label>Select Subject</label>
+      <select id="subjectSelect" onchange="renderDaily()"></select>
+      <button class="btn danger" onclick="deleteSubject()">Delete Subject</button>
+
+      <hr style="margin:20px 0">
+
+      <h2>Add Attendance</h2>
+      <label>Date</label>
+      <input type="date" id="date" />
+
+      <label>Total Periods</label>
+      <input type="number" id="periods" />
+
+      <label>Periods Attended</label>
+      <input type="number" id="attended" />
+
+      <button class="btn success" onclick="addAttendance()">Add Attendance</button>
+    </div>
+
+    <div class="card">
+      <h2>Attendance Summary</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Total Periods</th>
+            <th>Attended</th>
+            <th>Percentage</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+
+      <h2 style="margin-top:30px;">Daily Attendance (Edit)</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Total</th>
+            <th>Attended</th>
+            <th>Edit</th>
+          </tr>
+        </thead>
+        <tbody id="dailyBody"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let data = JSON.parse(localStorage.getItem('multiAttendance')) || {};
+
+  function saveData() {
+    localStorage.setItem('multiAttendance', JSON.stringify(data));
+  }
+
+  function addSubject() {
+    const s = newSubject.value.trim();
+    if (!s) return alert('Enter subject name');
+    if (!data[s]) data[s] = [];
+    newSubject.value = '';
+    saveData();
+    loadSubjects();
+  }
+
+  function loadSubjects() {
+    subjectSelect.innerHTML = '';
+    Object.keys(data).forEach(sub => {
+      const o = document.createElement('option');
+      o.value = sub;
+      o.textContent = sub;
+      subjectSelect.appendChild(o);
+    });
+    render();
+    renderDaily();
+  }
+
+  function addAttendance() {
+    const subject = subjectSelect.value;
+    if (!subject) return alert('Select subject');
+
+    data[subject].push({
+      date: date.value,
+      periods: parseInt(periods.value),
+      attended: parseInt(attended.value)
+    });
+
+    saveData();
+    render();
+    renderDaily();
+  }
+
+  function deleteSubject() {
+    const subject = subjectSelect.value;
+    if (!subject) return;
+    if (!confirm('Delete subject?')) return;
+    delete data[subject];
+    saveData();
+    loadSubjects();
+  }
+
+  function render() {
+    tableBody.innerHTML = '';
+    Object.keys(data).forEach(subject => {
+      let totalP = 0, totalA = 0;
+      data[subject].forEach(r => {
+        totalP += r.periods;
+        totalA += r.attended;
+      });
+      const pct = totalP ? ((totalA / totalP) * 100).toFixed(2) : 0;
+      tableBody.innerHTML += `
+        <tr>
+          <td>${subject}</td>
+          <td>${totalP}</td>
+          <td>${totalA}</td>
+          <td>${pct}%</td>
+          <td>${pct < 85 ? '<span class="warning">Below 85%</span>' : '<span class="safe">Safe</span>'}</td>
+        </tr>`;
+    });
+  }
+
+  function renderDaily() {
+    const subject = subjectSelect.value;
+    dailyBody.innerHTML = '';
+    if (!subject || !data[subject]) return;
+
+    data[subject].forEach((r, i) => {
+      dailyBody.innerHTML += `
+        <tr>
+          <td><input type="date" value="${r.date}" onchange="edit(${i}, 'date', this.value)"></td>
+          <td><input type="number" value="${r.periods}" onchange="edit(${i}, 'periods', this.value)"></td>
+          <td><input type="number" value="${r.attended}" onchange="edit(${i}, 'attended', this.value)"></td>
+          <td><button class="btn small danger" onclick="removeDay(${i})">Delete</button></td>
+        </tr>`;
+    });
+  }
+
+  function edit(i, key, val) {
+    const subject = subjectSelect.value;
+    data[subject][i][key] = key === 'date' ? val : parseInt(val);
+    saveData();
+    render();
+  }
+
+  function removeDay(i) {
+    const subject = subjectSelect.value;
+    if (!confirm('Delete this day attendance?')) return;
+    data[subject].splice(i, 1);
+    saveData();
+    render();
+    renderDaily();
+  }
+
+  function logout() {
+    if (!confirm('Do you want to logout?')) return;
+    localStorage.clear();
+    window.location.href = "login.html";
+  }
+
+  /* ✅ ONLY THIS LINE CHANGED */
+  function goToLogin() {
+    window.location.href = "http://127.0.0.1:5501/index.html";
+  }
+
+  loadSubjects();
+</script>
+
+</body>
+</html>
